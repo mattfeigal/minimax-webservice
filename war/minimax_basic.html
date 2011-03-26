@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+    <title>Minimax</title>
+    <meta http-equiv="Content-Language" content="en-us" />
+    <meta name="author" content="Lukas Vermeer" />
+	<link rel="stylesheet" href="style.css" type="text/css" />
+	<link rel="stylesheet" href="minimax.css" type="text/css" />
+    <script src="jquery/jquery-1.4.4.min.js" type="text/javascript"></script>
+    <script src="jquery/jgcharts.pack.js" type="text/javascript"></script>
+	<script type="text/javascript"><!--	
+	
+		//how to share this static between server and client?
+		OFF_BOARD = 2;
+		BOARDSIZE = 7;
+		LOOK_AHEAD = 4;
+		WIN_SCORE = 9999;
+	
+		//how to share this variable between server and client? it is used by buildBoard and playColumn
+		turn = 0;
+		//currentBoard = new Board(BOARDSIZE,0,new Array(BOARDSIZE^2));
+		currentBoard = 0;
+		scoreCache = new Array();
+		
+		
+		function clicked() {
+
+			
+			//This reads the array.
+			//Currently reading an array of arrays, so a tic-tac-toe board would be:
+			// [[0,0,1],[1,1,1],[2,2,0]]
+			$.getJSON("gae_minimax/boardservlet", 
+				function(data) {
+					alert(data.toString());
+					var testBoard = [];
+					$.each(data, function(key, value) {
+						testBoard.push('row=' + key + ' contains=' + value);
+						//Need a further .each statement to read the subarray.
+					});
+				alert(testBoard);
+				$("#testmessage").html(testBoard.toString());
+			});
+			
+			
+		}
+	
+		// DOM manipulation for GUI
+		function buildBoard(size){
+			$("#board").append( $("<table id='boardId'>").addClass("boardTable") );
+			for (i = 0; i < size; ++i) {
+				$(".boardTable").append( $("<tr>").addClass("boardRow") );
+				for (j = 0; j < size; ++j) {
+					$(".boardRow:last").append( $("<td>").addClass("boardCell").data("column",j)
+					.click(function() {
+						if(turn==0) { playColumn(jQuery.data(this,"column")); }
+					}));
+				}
+			}	
+		}
+		
+		function playColumn(c) {			
+			if (currentBoard.getScore(0) != WIN_SCORE && currentBoard.getScore(1) != WIN_SCORE && !currentBoard.isFull()) {
+				$("#board tr td:nth-child("+(c+1)+"):not(.played):last").addClass("played player"+(turn+1)).data("player",turn);			
+				currentBoard.playColumn(c);
+								
+				turn = Math.abs(turn-1);
+
+				if (turn == 1) {
+					//This setTimeout makes sure it shows human move before starting to calculate computer move
+					//maybe change this.
+					//going to need to call minmax on server.
+					window.setTimeout('playColumn(minMax(turn,currentBoard,LOOK_AHEAD)[0]);', 10);
+					if (LOOK_AHEAD < 5) LOOK_AHEAD++;
+					$("#score").html('computer thinking');
+				}
+				else { $("#score").html('human thinking'); }
+			} 
+			if (currentBoard.getScore(0) == WIN_SCORE) { $("#score").html('you win, game over'); }
+			if (currentBoard.getScore(1) == WIN_SCORE) { $("#score").html('computer wins, game over'); }
+			if (currentBoard.isFull()) { $("#score").html('no move possible, game over'); }
+			$("#testmessage").html(currentBoard);
+		}
+		
+		
+		
+	
+		
+		
+		$(document).ready(function() {
+			buildBoard(BOARDSIZE);
+			
+			
+			// jQuery + CSS magic for highlighting target column
+			$("#boardId").delegate('td','mouseover mouseleave', function(e) {
+				if (e.type == 'mouseover' && turn == 0) {
+					$("#board tr td:nth-child("+($(this).index()+1)+"):not(.played)").addClass("hover");
+					$("#board tr td:nth-child("+($(this).index()+1)+"):not(.played):last").addClass("hover-target");
+				}
+				else {
+					$("#board tr td:nth-child("+($(this).index()+1)+"):not(.played)").removeClass("hover");
+					$("#board tr td:nth-child("+($(this).index()+1)+"):not(.played):last").removeClass("hover-target");
+				}
+			});
+		});
+	
+	--></script>
+
+
+</head>    
+<body>
+	<h1>Minimax</h1>
+	
+	<div id="testbutton">
+		<input type="button" value="Click me!" onclick="clicked()" />
+		<br />
+		<span id="testmessage">testing info lands here</span>
+	</div>
+	
+	<div id="credits">
+		Play a game of <a href="http://en.wikipedia.org/wiki/Connect_Four">connect four</a> against a computer opponent that can think ahead five moves and never makes mistakes (thinking takes time, please be patient). Scores are based on number of possible winning game states. 
+	</div>
+	
+	<div id="board">
+	</div>
+
+	<div id="explain">
+		<span id="score">click a column to make the first move</span>
+	</div>
+
+	<div id="credits">
+		Created by <a href="http://www.lukasvermeer.nl">Lukas Vermeer</a> on December 31th 2010 using <a href="http://jquery.com/">jQuery</a>.
+	</div>
+	
+	
+</body>
+</html>    

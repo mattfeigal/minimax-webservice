@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>greetServlet</servlet-name>
+    <servlet-class>minimax.server.GreetingServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>greetServlet</servlet-name>
+    <url-pattern>/gae_minimax/greet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>boardServlet</servlet-name>
+    <servlet-class>minimax.server.BoardServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>boardServlet</servlet-name>
+    <url-pattern>/gae_minimax/boardservlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>boardServletNotWorking</servlet-name>
+    <servlet-class>minimax.server.BoardServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>boardServletNotWorking</servlet-name>
+    <url-pattern>/gae_minimax/board</url-pattern>
+  </servlet-mapping>
+  
+  
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>minimax_lukas.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>
